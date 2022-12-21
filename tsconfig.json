@@ -1,6 +1,10 @@
 {
   "include": ["src"],
   "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "~/*": ["./*"]
+    },
     "target": "es2018",
     "module": "esnext",
     "importHelpers": true,
