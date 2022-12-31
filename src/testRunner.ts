@@ -1,22 +1,57 @@
-import { BigNumber } from 'ethers'
-import { MarketData, MarketSimulator, PriceLog, PortfolioManager } from './core'
+import { utils } from "ethers";
+import {
+  MarketData,
+  MarketSimulator,
+  PriceLog,
+  PortfolioManager,
+  TradePointCryptoBasic,
+  Strategy,
+} from "./core";
 
-const usdcHistory: PriceLog = [0, 0, 0, 0, 0].reduce((prev: any, _, i) => (prev[i] = 1), {})
+const usdcHistory: PriceLog = [0, 0, 0, 0, 0].reduce((prev: any, _, i) => {
+  prev[i.toString()] = utils.parseEther("1");
+  return prev;
+}, {});
 
-console.log(usdcHistory)
-const portHistory: PriceLog = {}
+const portHistory: PriceLog = [0, 0, 0, 0, 0].reduce((prev: any, _, i) => {
+  prev[i.toString()] = utils.parseEther((Math.random() * 10).toFixed(2));
+  console.log(utils.formatEther(prev[i.toString()]));
+  // { '0': 9.48, '1': 6.45, '2': 9.61, '3': 2.26, '4': 0.2 }
+  return prev;
+}, {});
 
 const marketData: MarketData = {
   USDC: usdcHistory,
   PORT: portHistory,
-}
+};
 
-const portfolioManager: PortfolioManager = new PortfolioManager({})
-portfolioManager.addPortfolio('Alice', {})
-portfolioManager.updateBalance('Alice', 'USDC', BigNumber.from(100))
-portfolioManager.addPortfolio('Bob', {})
-portfolioManager.updateBalance('Bob', 'USDC', BigNumber.from(100))
+const strategy1TradeHistory: TradePointCryptoBasic[] = [
+  {
+    timestamp: "0",
+    t0: "USDC",
+    t1: "PORT",
+    amount: utils.parseEther("10"),
+  },
+  {
+    timestamp: "1",
+    t0: "PORT",
+    t1: "USDC",
+    amount: utils.parseEther("1"),
+  },
+];
 
-const marketSimulator: MarketSimulator = new MarketSimulator(marketData, portfolioManager)
+const portfolioManager: PortfolioManager = new PortfolioManager({});
+portfolioManager.addPortfolio("alice", {});
+portfolioManager.updateBalance("alice", "USDC", utils.parseEther("100"));
+portfolioManager.addPortfolio("bob", {});
+portfolioManager.updateBalance("bob", "USDC", utils.parseEther("100"));
 
-marketSimulator.initialize()
+const marketSimulator: MarketSimulator = new MarketSimulator(
+  marketData,
+  portfolioManager
+);
+
+marketSimulator.initialize();
+
+const strategy: Strategy = new Strategy(marketSimulator, strategy1TradeHistory);
+strategy.evaluate("alice");
